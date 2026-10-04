@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Order;
 use App\Models\TicketType;
 use App\Services\OrderReservationService;
+use App\Services\PaymentRecoveryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -117,8 +118,10 @@ class OrderController extends Controller
         return view('transactions.index', compact('orders'));
     }
 
-    public function myTickets(Request $request): \Illuminate\View\View
+    public function myTickets(Request $request, PaymentRecoveryService $paymentRecovery): \Illuminate\View\View
     {
+        $paymentRecovery->recoverRecordedSuccesses((int) $request->user()->id);
+
         $orders = $request->user()->orders()
             ->where('status', 'confirmed')
             ->with('items.ticketType.event', 'items.qrInfo')
